@@ -22,8 +22,6 @@ import com.pi4j.io.gpio.RaspiPin;*/
 public class GVTesting {
 	final static int ACCEPTABLE_SECONDS_TEXT_DELAY = 300;
 	final static boolean DEBUG = true;
-	final static String username = "USERNAME@gmail.com";
-	final static String password = "PASSWORD123";
 	final static String gatepass = "open sesame";
 	Voice voice;
 	Timer timer;

@@ -12,7 +12,7 @@ import java.util.LinkedList;
 
 public class GoogleVoiceSMS implements SMSReceiver {
 	final int storage_time = 3600; //Store the last hour's messages in the DB so we don't duplicate
-	final String username = "USERNAME@gmail.com", password = "PASS";
+	final String username = "USERNAME@gmail.com", password = "PASSWORD";
 	//We need to remember which texts we've responded to, because when a message thread is marked as unread, we don't
 	//know which *specific* messages are unread. If we remember all of the messages that we've handled from the last
 	//hour or so, we won't respond twice (since we never take action when a receieved message is older than 10 mins)
