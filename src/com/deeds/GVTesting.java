@@ -13,11 +13,11 @@ import com.techventus.server.voice.datatypes.Contact;
 import com.techventus.server.voice.datatypes.records.SMS;
 import com.techventus.server.voice.datatypes.records.SMSThread;
 
-import com.pi4j.io.gpio.GpioController;
+/*import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.RaspiPin;*/
 
 public class GVTesting {
 	final static int ACCEPTABLE_SECONDS_TEXT_DELAY = 300;
@@ -27,10 +27,10 @@ public class GVTesting {
 	final static String gatepass = "open sesame";
 	Voice voice;
 	Timer timer;
-	ArrayList<String> whitelist;
-	
-    final GpioController gpio = GpioFactory.getInstance();
-    final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);
+	ArrayList<String> whitelist = new ArrayList<String>();
+
+	/*final GpioController gpio = GpioFactory.getInstance();
+    final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);*/
 
 	public static void main(String[] args) {
 		new GVTesting();
@@ -39,9 +39,38 @@ public class GVTesting {
 	GVTesting() {
 
 		System.out.println("Starting...");
-		try {
-	
+		whitelist.add("2138675309");
+		SMSReceiver receiver = new GoogleVoiceSMS();
+		receiver.initialize();
+		while(true) {
+			if (receiver.message_available()) {
+				simpleSMS sms = receiver.getMessage();
+				if (whitelist.contains(sms.sender)) {
+					if (sms.content.trim().equalsIgnoreCase(gatepass)) {
+						System.out.println("Welcome in!");
+						opengate();
+					}
+					else {
+						System.out.println("Bad password!");
+					}
+				}
+				else {
+					System.out.println("Unapproved sender! (" + sms.sender + ")");
+				}
+			}
+			else {
+
+			}
+			try {
+				synchronized(this) {
+					this.wait(5000);
+				}
+			} catch (InterruptedException e) {}
+		}
+
+		/*try {
 			voice = new Voice(username,password);
+			System.out.println(voice.getUnreadSMS());
 			System.out.println("Checking messages for " + voice.getPhoneNumber());
 			timer = new Timer();
 			whitelist = new ArrayList<String>();
@@ -54,7 +83,7 @@ public class GVTesting {
 					} catch (IOException e) {}
 				}
 			}, 500, 7500);
-		} catch (IOException e) { e.printStackTrace();}
+		} catch (IOException e) { e.printStackTrace();}*/
 	}
 
 	private boolean checkmessages() throws IOException {
@@ -92,7 +121,7 @@ public class GVTesting {
 				opengate();
 			}
 			else System.err.println("Unauthorized access from number:" + sender.getNumber());
-			
+
 		}
 		else {
 			System.out.println("Wrong password!");
@@ -100,13 +129,13 @@ public class GVTesting {
 		}
 		voice.markAsRead(thread.getId());
 	}
-	
+
 
 	void opengate() {
 		System.out.println("Opening gate");
-		pin.pulse(1250);
+		//pin.pulse(1250);
 	}
-	
+
 	private String parsePhoneNumber(String raw) {
 		return raw.substring(raw.length()-10);
 	}
