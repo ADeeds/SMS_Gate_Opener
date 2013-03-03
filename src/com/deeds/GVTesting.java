@@ -38,8 +38,10 @@ public class GVTesting {
 
 		System.out.println("Starting...");
 		whitelist.add("2138675309");
-		SMSReceiver receiver = new GoogleVoiceSMS();
-		receiver.initialize();
+		GoogleVoiceSMS gv = new GoogleVoiceSMS();
+		gv.initialize();
+		SMSReceiver receiver = gv;
+		SMSSender sender = gv;
 		while(true) {
 			if (receiver.message_available()) {
 				simpleSMS sms = receiver.getMessage();
@@ -49,11 +51,13 @@ public class GVTesting {
 						opengate();
 					}
 					else {
-						System.out.println("Bad password!");
+						System.out.println("Recieved bad password from " + sms.sender);
+						sender.send_message(sms.sender, "Sorry, wrong password");
 					}
 				}
 				else {
 					System.out.println("Unapproved sender! (" + sms.sender + ")");
+					sender.send_message(sms.sender, "You are not on the approved senders list");
 				}
 			}
 			else {
@@ -65,23 +69,6 @@ public class GVTesting {
 				}
 			} catch (InterruptedException e) {}
 		}
-
-		/*try {
-			voice = new Voice(username,password);
-			System.out.println(voice.getUnreadSMS());
-			System.out.println("Checking messages for " + voice.getPhoneNumber());
-			timer = new Timer();
-			whitelist = new ArrayList<String>();
-			whitelist.add("2138675309");
-			//if (whitelist.contains("2138675309")) System.err.println("Yes");
-			timer.scheduleAtFixedRate(new TimerTask() {
-				public void run() {
-					try {
-						checkmessages();
-					} catch (IOException e) {}
-				}
-			}, 500, 7500);
-		} catch (IOException e) { e.printStackTrace();}*/
 	}
 
 	private boolean checkmessages() throws IOException {
