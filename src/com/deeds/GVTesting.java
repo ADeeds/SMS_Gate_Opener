@@ -13,11 +13,11 @@ import com.techventus.server.voice.datatypes.Contact;
 import com.techventus.server.voice.datatypes.records.SMS;
 import com.techventus.server.voice.datatypes.records.SMSThread;
 
-/*import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;*/
+import com.pi4j.io.gpio.RaspiPin;
 
 public class GVTesting {
 	final static int ACCEPTABLE_SECONDS_TEXT_DELAY = 300;
@@ -27,15 +27,15 @@ public class GVTesting {
 	Timer timer;
 	ArrayList<String> whitelist = new ArrayList<String>();
 
-	/*final GpioController gpio = GpioFactory.getInstance();
-    final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);*/
+	final GpioController gpio = GpioFactory.getInstance();
+	//Uses pin 1 (which is NOT in the top right corner, see the diagram at http://elinux.org/RPi_Low-level_peripherals
+    final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);
 
 	public static void main(String[] args) {
 		new GVTesting();
 	}
 
 	GVTesting() {
-
 		System.out.println("Starting...");
 		whitelist.add("2138675309");
 		GoogleVoiceSMS gv = new GoogleVoiceSMS();
@@ -46,15 +46,18 @@ public class GVTesting {
 			if (receiver.message_available()) {
 				simpleSMS sms = receiver.getMessage();
 				if (whitelist.contains(sms.sender)) {
+					//Approved sender and correct password
 					if (sms.content.trim().equalsIgnoreCase(gatepass)) {
 						System.out.println("Welcome in!");
 						opengate();
 					}
+					//Approved sender; bad password
 					else {
 						System.out.println("Recieved bad password from " + sms.sender);
 						sender.send_message(sms.sender, "Sorry, wrong password");
 					}
 				}
+				//Unapproved sender
 				else {
 					System.out.println("Unapproved sender! (" + sms.sender + ")");
 					sender.send_message(sms.sender, "You are not on the approved senders list");
@@ -65,60 +68,15 @@ public class GVTesting {
 			}
 			try {
 				synchronized(this) {
-					this.wait(5000);
+					this.wait(5000);			//Wait for 5 seconds before next check
 				}
 			} catch (InterruptedException e) {}
 		}
 	}
 
-	private boolean checkmessages() throws IOException {
-		if (DEBUG) System.out.println("Checking messages");
-		for (SMSThread t : voice.getUnreadSMSThreads()) {
-			if (!t.getRead()) {
-				System.out.println();
-				long texttime = t.getDate().getTime();
-				long currenttime = System.currentTimeMillis();
-				long tdiff = currenttime - texttime;
-				if (ACCEPTABLE_SECONDS_TEXT_DELAY*1000 > tdiff) {
-					if (DEBUG) System.out.println("Fresh message (" + tdiff/1000 + " seconds old)");
-					processThread(t);
-					return true;
-				}
-				else if (DEBUG) System.out.println("Too old (" + (currenttime-texttime)/1000 + ")");
-			}
-			else System.err.println("SOMETHING HAS GONE HORRIBLY WRONG");
-		}
-		return false;
-	}
-	private void processThread(SMSThread thread) throws IOException {
-		SMS top = ((TreeSet<SMS>)thread.getAllSMS()).first();
-		Contact sender = top.getFrom();
-		String sendernumber = parsePhoneNumber(sender.getNumber());
-		if (DEBUG) {
-			System.out.print("New message from " + sender.getName());
-			System.out.println(": " + sendernumber + " (" + sender.getNumber() + ")");
-			System.out.println(top.getContent());
-		}
-		if (top.getContent().equalsIgnoreCase(gatepass)) {
-			if (whitelist.contains(sendernumber)) {
-				System.out.println("Welcome in!");
-				voice.sendSMS(sendernumber, "Password accepted... welcome in!");
-				opengate();
-			}
-			else System.err.println("Unauthorized access from number:" + sender.getNumber());
-
-		}
-		else {
-			System.out.println("Wrong password!");
-			voice.sendSMS(sendernumber, "Wrong password");
-		}
-		voice.markAsRead(thread.getId());
-	}
-
-
 	void opengate() {
 		System.out.println("Opening gate");
-		//pin.pulse(1250);
+		pin.pulse(1250);
 	}
 
 	private String parsePhoneNumber(String raw) {
