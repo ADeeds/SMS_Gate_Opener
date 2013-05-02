@@ -39,7 +39,6 @@ public class GVTesting {
 		System.out.println("Starting...");
 		whitelist.add("2138675309");
 		GoogleVoiceSMS gv = new GoogleVoiceSMS();
-		gv.initialize();
 		SMSReceiver receiver = gv;
 		SMSSender sender = gv;
 		while(true) {
@@ -63,9 +62,7 @@ public class GVTesting {
 					sender.send_message(sms.sender, "You are not on the approved senders list");
 				}
 			}
-			else {
 
-			}
 			try {
 				synchronized(this) {
 					this.wait(5000);			//Wait for 5 seconds before next check
@@ -78,9 +75,4 @@ public class GVTesting {
 		System.out.println("Opening gate");
 		pin.pulse(1250);
 	}
-
-	private String parsePhoneNumber(String raw) {
-		return raw.substring(raw.length()-10);
-	}
-
 }
