@@ -2,7 +2,6 @@ package com.deeds;
 
 
 import com.techventus.server.voice.Voice;
-import com.techventus.server.voice.datatypes.Contact;
 import com.techventus.server.voice.datatypes.records.SMS;
 import com.techventus.server.voice.datatypes.records.SMSThread;
 
@@ -89,9 +88,14 @@ public class GoogleVoiceSMS implements SMSReceiver, SMSSender {
 		return raw.substring(raw.length()-10);
 	}
 	public simpleSMS getMessage() {
-		SMS message = pending.pop();
-		String number = parsePhoneNumber(message.getFrom().getNumber());
-		return new simpleSMS(number, message.getContent(), message.getDateTime());
+		if (pending.size() > 0) {
+			SMS message = pending.pop();
+			String number = parsePhoneNumber(message.getFrom().getNumber());
+			return new simpleSMS(number, message.getContent(), message.getDateTime());
+		}
+		else {
+			return null;
+		}
 	}
 
 	@Override
