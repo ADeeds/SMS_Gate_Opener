@@ -13,11 +13,11 @@ import com.techventus.server.voice.datatypes.Contact;
 import com.techventus.server.voice.datatypes.records.SMS;
 import com.techventus.server.voice.datatypes.records.SMSThread;
 
-/*import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.PinState;
-import com.pi4j.io.gpio.RaspiPin;*/
+import com.pi4j.io.gpio.RaspiPin;
 
 public class GVTesting {
 	final static int ACCEPTABLE_SECONDS_TEXT_DELAY = 300;
@@ -27,8 +27,8 @@ public class GVTesting {
 	Timer timer;
 	ArrayList<String> whitelist = new ArrayList<String>();
 
-	/*final GpioController gpio = GpioFactory.getInstance();
-    final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);*/
+	final GpioController gpio = GpioFactory.getInstance();
+    final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, PinState.LOW);
 
 	public static void main(String[] args) {
 		new GVTesting();
@@ -118,7 +118,7 @@ public class GVTesting {
 
 	void opengate() {
 		System.out.println("Opening gate");
-		//pin.pulse(1250);
+		pin.pulse(1250);
 	}
 
 	private String parsePhoneNumber(String raw) {
